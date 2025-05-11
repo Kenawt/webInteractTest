@@ -5,7 +5,7 @@ from telegram import Bot
 
 # --- Settings from environment ---
 URL = os.environ["CALENDAR_URL"]
-CHECK_INTERVAL_MINUTES = int(os.environ.get("CHECK_INTERVAL_MINUTES", 5))
+CHECK_INTERVAL_MINUTES = 1
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_IDS = os.environ["TELEGRAM_CHAT_IDS"].split(",")
 
