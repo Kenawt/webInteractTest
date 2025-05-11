@@ -3,11 +3,17 @@ import os
 from playwright.async_api import async_playwright
 from telegram import Bot
 
-# --- Settings from environment ---
+def get_env(name, fallback=None):
+    value = os.environ.get(name)
+    if value is None:
+        print(f"❌ MISSING ENV VAR: {name}")
+    return value if value else fallback
+
+TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_IDS = get_env("TELEGRAM_CHAT_IDS", "").split(",")
 URL = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el"
-CHECK_INTERVAL_MINUTES = 1
-TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
-TELEGRAM_CHAT_IDS = os.environ["TELEGRAM_CHAT_IDS"].split(",")
+CHECK_INTERVAL_MINUTES = int(5)
+
 
 bot = Bot(token=TELEGRAM_TOKEN)
 
