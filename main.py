@@ -4,7 +4,7 @@ from playwright.async_api import async_playwright
 from telegram import Bot
 
 # --- Settings from environment ---
-URL = https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el
+URL = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el"
 *os.environ["CALENDAR_URL"]
 CHECK_INTERVAL_MINUTES = 1
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
