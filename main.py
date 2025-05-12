@@ -27,7 +27,7 @@ async def send_telegram_message(message):
 
 async def check_calendar():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(channel="chrome", headless=True)
+        browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
         try:
             await page.goto(URL, timeout=60000)
