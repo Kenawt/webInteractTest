@@ -85,17 +85,20 @@ async def main():
     # Notify bot startup with time
     now = datetime.now(SG_TIMEZONE)
     await send_telegram_message(f"🤖 Bot started at {now.strftime('%Y-%m-%d %H:%M:%S')} GMT+8.\n"
-                                f"🕙 It will send a daily check-in at 11:00 PM GMT+8.")
-
+                                f"🕙 It will send a daily check-in at 11:15 PM GMT+8.")
+    last_daily_ping_date = None
     while True:
         await check_all_websites()
 
-        # Check if it's 11:00 PM GMT+8 ± 1 minute to send daily message
         now = datetime.now(SG_TIMEZONE)
-        if now.hour == 23 and now.minute == 0:
-            await send_telegram_message("🕙 Daily check-in: Bot is still running as of 11:00 PM GMT+8.")
+        current_date = now.date()
 
-        await asyncio.sleep(300)  # 5 minutes
+        # If it's after 11PM and you haven't pinged today yet
+        if now.hour >= 23 and now.minute >= 15 and last_daily_ping_date != current_date:
+            await send_telegram_message("🕙 Daily check-in: Bot is still running as of 11:00 PM GMT+8.")
+            last_daily_ping_date = current_date
+            
+        await asyncio.sleep(180)  # 3 minutes
 
 if __name__ == "__main__":
     asyncio.run(main())
