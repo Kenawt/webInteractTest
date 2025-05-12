@@ -51,23 +51,26 @@ async def check_website():
             await page.wait_for_timeout(5000)
             await send_telegram_message("⏳ Waited 5 seconds for JavaScript.")
 
-            # Wait for the span with specific text to appear and click it
+            # Locate and click the button
             locator = page.locator("span", has_text="Jump to the next bookable date").first
             await locator.wait_for(timeout=15000)
             await locator.click()
             await send_telegram_message("🖱 Clicked 'Jump to next bookable date'.")
 
+            # Wait another 5s for post-click content updates
+            await page.wait_for_timeout(5000)
+
+            # Now check for the availability message
             content = await page.content()
-            if "No available times in the next year" not in content:
-                await send_telegram_message("📅 A slot might be available!")
-            else:
+            if "No available times in the next year" in content:
                 await send_telegram_message("❌ Still no availability.")
+            else:
+                await send_telegram_message("📅 A slot might be available!")
         except Exception as e:
             print(f"❌ Error: {e}")
             await send_telegram_message(f"❗ Error during check: {e}")
         finally:
             await browser.close()
-
 
 async def main():
     await check_website()
