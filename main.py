@@ -22,7 +22,6 @@ def get_env(name, fallback=None):
 # Load config
 TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_IDS = get_env("TELEGRAM_CHAT_IDS", "").split(",")
-URL = ("")
 
 # List of websites to check, format: ("Name", "URL")
 URLS_TO_CHECK = [
@@ -54,7 +53,7 @@ async def check_website(name,url):
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
         try:
-            await page.goto(URL, timeout=60000)
+            await page.goto(url, timeout=60000)
             
             #Hashes below are for debug
             #await send_telegram_message(f"📍 [{name}] Arrived at page!\n{url}")
