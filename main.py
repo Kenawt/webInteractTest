@@ -2,6 +2,7 @@ print("🚀 Python booting...")
 
 import sys
 sys.stdout.flush()
+import datetime
 
 try:
     import asyncio
@@ -63,6 +64,7 @@ async def check_website():
             # Now check for the availability message
             content = await page.content()
             if "No available times in the next year" in content:
+                print("❌ Still no availability.")
                 #await send_telegram_message("❌ Still no availability.")
             else:
                 await send_telegram_message("📅 A slot might be available!")
@@ -73,10 +75,23 @@ async def check_website():
             await browser.close()
 
 async def main():
+    start_time = datetime.datetime.now()
+    notified_today = False
+
     while True:
         await check_website()
-        print(f"⏳ Waiting 5 minutes before next check...")
-        await asyncio.sleep(5 * 60)  # 5 minutes in seconds
+
+        # Check if 24 hours have passed since the last notification
+        elapsed = datetime.datetime.now() - start_time
+        if elapsed.total_seconds() >= 86400 and not notified_today:
+            await send_telegram_message("📆 Daily ping: Bot is still running and checking every 5 minutes.")
+            start_time = datetime.datetime.now()
+            notified_today = True
+        elif elapsed.total_seconds() < 86400:
+            notified_today = False
+
+        print("⏳ Waiting 5 minutes before next check...")
+        await asyncio.sleep(5 * 60)
 
 
 if __name__ == "__main__":
