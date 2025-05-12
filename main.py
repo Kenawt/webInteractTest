@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from playwright.async_api import async_playwright
 from telegram import Bot
 import time
-import pytz
 
 print("🚀 Python booting...")
 sys.stdout.flush()
