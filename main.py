@@ -1,3 +1,7 @@
+print("🚀 Python booting...")
+
+import sys
+sys.stdout.flush()
 import asyncio
 import os
 from playwright.async_api import async_playwright
@@ -81,3 +85,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    print("⏳ Finished? Something failed silently.")
