@@ -8,19 +8,19 @@ def get_env(name, fallback=None):
     if value is None:
         print(f"❌ MISSING ENV VAR: {name}")
     return value if value else fallback
-    
-print("✅ Booting up...")
 
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_IDS = os.environ.get("TELEGRAM_CHAT_IDS", "").split(",")
-if not TELEGRAM_CHAT_IDS or TELEGRAM_CHAT_IDS == [""]:
-    print("❌ Still no TELEGRAM_CHAT_IDS value loaded!")
-URL = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el"
-CHECK_INTERVAL_MINUTES = int(1)
+print("✅ Booting up main.py...")
 
+# Load env vars with safe fallbacks
+TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_IDS = get_env("TELEGRAM_CHAT_IDS", "").split(",")
+URL = ("https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el")
+CHECK_INTERVAL_MINUTES = int(get_env(1)
+
+# Display config
 print("🔍 ENV LOADED:")
 print("Token:", "✔" if TELEGRAM_TOKEN else "❌ MISSING")
-print("Chat IDs:", TELEGRAM_CHAT_IDS)
+print("Chat IDs:", TELEGRAM_CHAT_IDS if TELEGRAM_CHAT_IDS != [""] else "❌ None provided")
 print(URL)
 
 bot = Bot(token=TELEGRAM_TOKEN)
@@ -35,15 +35,20 @@ async def send_telegram_message(message):
 
 async def check_calendar():
     async with async_playwright() as p:
+        print("🧠 Waiting 5s for network...")
+        await asyncio.sleep(5)
+
         print("🧠 Attempting to launch browser...")
         browser = await p.chromium.launch(headless=True)
         print("✅ Browser launched")
 
         page = await browser.new_page()
         try:
+            print("🌍 Navigating to calendar page...")
             await page.goto(URL, timeout=60000)
             print("🌐 Page loaded.")
 
+            print("➡️ Clicking 'Jump to next available bookable date'...")
             await page.click("text=Jump to next available bookable date", timeout=15000)
             await page.wait_for_timeout(5000)
 
@@ -55,17 +60,18 @@ async def check_calendar():
                 print("❌ Still no availability.")
                 return False
         except Exception as e:
-            print(f"❗ Error: {e}")
+            print(f"❗ Error during calendar check: {e}")
             return False
         finally:
             await browser.close()
 
 async def main():
-    print("🔍 Started checking...")
+    print("🔁 Starting calendar check loop...")
     while True:
         if await check_calendar():
-            await send_telegram_message("🚨 A slot may be available! Check the calendar:\n" + URL)
+            await send_telegram_message(f"🚨 A slot may be available!\n{URL}")
             break
+        print(f"⏳ Waiting {CHECK_INTERVAL_MINUTES} minute(s) before next check...")
         await asyncio.sleep(CHECK_INTERVAL_MINUTES * 60)
 
 if __name__ == "__main__":
