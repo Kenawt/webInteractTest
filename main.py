@@ -8,14 +8,20 @@ def get_env(name, fallback=None):
     if value is None:
         print(f"❌ MISSING ENV VAR: {name}")
     return value if value else fallback
+    
+print("✅ Booting up...")
 
-TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_IDS = os.environ.get("TELEGRAM_CHAT_IDS", "").split(",")
 if not TELEGRAM_CHAT_IDS or TELEGRAM_CHAT_IDS == [""]:
     print("❌ Still no TELEGRAM_CHAT_IDS value loaded!")
 URL = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el"
-CHECK_INTERVAL_MINUTES = int(5)
+CHECK_INTERVAL_MINUTES = int(1)
 
+print("🔍 ENV LOADED:")
+print("Token:", "✔" if TELEGRAM_TOKEN else "❌ MISSING")
+print("Chat IDs:", TELEGRAM_CHAT_IDS)
+print(URL)
 
 bot = Bot(token=TELEGRAM_TOKEN)
 
