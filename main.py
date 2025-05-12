@@ -26,7 +26,7 @@ def get_env(name, fallback=None):
 TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_IDS = get_env("TELEGRAM_CHAT_IDS", "").split(",")
 URL = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el"
-CHECK_INTERVAL_MINUTES = int(1)
+CHECK_INTERVAL_MINUTES = int(get_env("CHECK_INTERVAL_MINUTES", 1))
 
 bot = Bot(token=TELEGRAM_TOKEN)
 
@@ -45,20 +45,28 @@ async def check_website():
         page = await browser.new_page()
         try:
             await page.goto(URL, timeout=60000)
+            await send_telegram_message("📍 Arrived at page.")
             print("✅ Page loaded successfully.")
-            return True
+
+            await page.wait_for_timeout(5000)
+            await send_telegram_message("⏳ Waited 5 seconds for JavaScript.")
+
+            await page.click("text=Jump to next available bookable date", timeout=15000)
+            await send_telegram_message("🖱 Clicked 'Jump to next bookable date'.")
+
+            content = await page.content()
+            if "No available times in the next year" not in content:
+                await send_telegram_message("📅 A slot might be available!")
+            else:
+                await send_telegram_message("❌ Still no availability.")
         except Exception as e:
-            print(f"❌ Failed to load page: {e}")
-            return False
+            print(f"❌ Error: {e}")
+            await send_telegram_message(f"❗ Error during check: {e}")
         finally:
             await browser.close()
 
 async def main():
-    print("🔁 Checking site availability...")
-    if await check_website():
-        await send_telegram_message("📬 Bot has arrived at the page.")
-    else:
-        print("⚠️ Site not reachable.")
+    await check_website()
 
 if __name__ == "__main__":
     asyncio.run(main())
