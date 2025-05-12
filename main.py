@@ -2,11 +2,17 @@ print("🚀 Python booting...")
 
 import sys
 sys.stdout.flush()
-import asyncio
-import os
-from playwright.async_api import async_playwright
-from telegram import Bot
-import time
+
+try:
+    import asyncio
+    import os
+    from playwright.async_api import async_playwright
+    from telegram import Bot
+    import time
+except Exception as e:
+    print(f"❌ Import error: {e}")
+    sys.exit(1)
+
 
 print("⏳ Startup delay for debug...")
 time.sleep(5)
