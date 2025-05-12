@@ -63,7 +63,7 @@ async def check_website():
             # Now check for the availability message
             content = await page.content()
             if "No available times in the next year" in content:
-                await send_telegram_message("❌ Still no availability.")
+                #await send_telegram_message("❌ Still no availability.")
             else:
                 await send_telegram_message("📅 A slot might be available!")
         except Exception as e:
