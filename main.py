@@ -24,6 +24,14 @@ TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_IDS = get_env("TELEGRAM_CHAT_IDS", "").split(",")
 URL = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el"
 
+# List of websites to check, format: ("Name", "URL")
+URLS_TO_CHECK = [
+    ("8AM to 12PM", "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el"),
+    ("8AM to 10AM", "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1hsXIaeTeu9ChgNNlkeXWSUa9L-XMnGZ_ZP-3zxddON5OPeN7pXjUiakurt5Us69tZjuVxypr9"),
+    ("10AM to 12PM", "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ0DbxMOwTcYM3YBFm7G9X4uKwycOMloofkGYOi6M4Bgw9KarOeEsObP5g6RGjM8jtTZhmdY-eNL")
+]
+
+
 bot = Bot(token=TELEGRAM_TOKEN)
 SG_TIMEZONE = pytz.timezone("Asia/Singapore")
 
@@ -35,9 +43,13 @@ async def send_telegram_message(message):
             print(f"✅ Message sent to {chat_id}")
         except Exception as e:
             print(f"❌ Telegram error: {e}")
+            
+async def check_all_websites():
+    for name, url in URLS_TO_CHECK:
+        await check_website(name, url)
 
 # Main page check
-async def check_website():
+async def check_website(name,url):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
@@ -56,12 +68,12 @@ async def check_website():
             content = await page.content()
             if "No available times in the next year" in content:
                 now = datetime.now(SG_TIMEZONE)
-                print(f"Still No Availability, checked at: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"[{name}] No availability as of: {now.strftime('%Y-%m-%d %H:%M:%S')}")
                 #await send_telegram_message("❌ Still no availability.")
             else:
-                await send_telegram_message("📅 A slot might be available!")
+                await send_telegram_message(f"📅 [{name}] A slot might be available!\n{url}")
         except Exception as e:
-            await send_telegram_message(f"❗ Error during check: {e}")
+            await send_telegram_message(f"❗ [{name}] Error during check: {e}")
         finally:
             await browser.close()
 
@@ -73,7 +85,7 @@ async def main():
                                 f"🕙 It will send a daily check-in at 11:00 PM GMT+8.")
 
     while True:
-        await check_website()
+        await check_all_websites()
 
         # Check if it's 11:00 PM GMT+8 ± 1 minute to send daily message
         now = datetime.now(SG_TIMEZONE)
