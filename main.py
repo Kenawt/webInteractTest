@@ -73,7 +73,11 @@ async def check_website():
             await browser.close()
 
 async def main():
-    await check_website()
+    while True:
+        await check_website()
+        print(f"⏳ Waiting 5 minutes before next check...")
+        await asyncio.sleep(5 * 60)  # 5 minutes in seconds
+
 
 if __name__ == "__main__":
     asyncio.run(main())
