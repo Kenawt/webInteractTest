@@ -1,41 +1,22 @@
-# Base image with Python 3.11
-FROM python:3.11-slim
-
-# Install required system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libxshmfence1 \
-    libgtk-3-0 \
-    libx11-xcb1 \
-    libnss3-tools \
-    && rm -rf /var/lib/apt/lists/*
+# Use official Playwright base image (includes Chromium + deps)
+FROM mcr.microsoft.com/playwright/python:v1.43.1-jammy
 
 # Set working directory
 WORKDIR /app
 
-# Copy only requirement-relevant files first to cache layers
-COPY pyproject.toml poetry.lock* requirements.txt* ./
+# Copy only requirement files first for caching
+COPY requirements.txt .
 
-# Install pip requirements
-RUN pip install --upgrade pip && \
-    pip install playwright python-telegram-bot && \
-    playwright install --with-deps
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the code
+# Copy the rest of your app
 COPY . .
 
-# Expose environment variables at runtime
+# Set env vars here or from Railway's dashboard
 ENV TELEGRAM_TOKEN=""
 ENV TELEGRAM_CHAT_IDS=""
 ENV CHECK_INTERVAL_MINUTES=1
 
-# Run script
+# Default command
 CMD ["python", "main.py"]
