@@ -22,7 +22,6 @@ def get_env(name, fallback=None):
 # Load config
 TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_IDS = get_env("TELEGRAM_CHAT_IDS", "").split(",")
-URL = "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el"
 
 # List of websites to check, format: ("Name", "URL")
 URLS_TO_CHECK = [
@@ -55,8 +54,11 @@ async def check_website(name,url):
         page = await browser.new_page()
         try:
             await page.goto(URL, timeout=60000)
-            await send_telegram_message(f"📍 [{name}] Arrived at page!\n{url}")
+            
+            #Hashes below are for debug
+            #await send_telegram_message(f"📍 [{name}] Arrived at page!\n{url}")
             #await send_telegram_message("📍 Arrived at page.")
+            
             await page.wait_for_timeout(5000)
             #await send_telegram_message("⏳ Waited 5 seconds for JavaScript.")
 
