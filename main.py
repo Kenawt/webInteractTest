@@ -51,7 +51,17 @@ async def check_website():
             await page.wait_for_timeout(5000)
             await send_telegram_message("⏳ Waited 5 seconds for JavaScript.")
 
-            await page.click("text=Jump to next available bookable date", timeout=15000)
+            # Wait for the element to appear before clicking
+            await page.wait_for_selector('span.mUIrbf-vQzf8d', timeout=15000)
+            
+            # Option 1: Click by class
+            #await page.click('span.mUIrbf-vQzf8d')
+            
+            # Option 2: Match exact text (slower but precise)
+            await page.locator("span", has_text="Jump to the next bookable date").click()
+            
+            await send_telegram_message("🖱 Clicked 'Jump to next bookable date'.")
+
             await send_telegram_message("🖱 Clicked 'Jump to next bookable date'.")
 
             content = await page.content()
