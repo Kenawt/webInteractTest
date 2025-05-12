@@ -81,3 +81,6 @@ async def main():
             await send_telegram_message("🕙 Daily check-in: Bot is still running as of 11:00 PM GMT+8.")
 
         await asyncio.sleep(300)  # 5 minutes
+
+if __name__ == "__main__":
+    asyncio.run(main())
