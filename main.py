@@ -22,6 +22,7 @@ def get_env(name, fallback=None):
 # Load config
 TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_IDS = get_env("TELEGRAM_CHAT_IDS", "").split(",")
+URL = ""
 
 # List of websites to check, format: ("Name", "URL")
 URLS_TO_CHECK = [
