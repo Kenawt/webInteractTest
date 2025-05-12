@@ -1,20 +1,41 @@
+# Base image with Python 3.11
 FROM python:3.11-slim
 
-# Install system dependencies for Playwright
+# Install required system dependencies
 RUN apt-get update && apt-get install -y \
-    wget curl gnupg libnss3 libxss1 libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
-    libxcomposite1 libxdamage1 libxrandr2 libgbm1 libgtk-3-0 libxkbcommon0 \
-    libx11-xcb1 libpangocairo-1.0-0 libpangoft2-1.0-0 fonts-liberation \
-    libappindicator3-1 libu2f-udev libvulkan1 unzip xvfb lsb-release gnupg2 \
+    curl \
+    gnupg \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libxshmfence1 \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libnss3-tools \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Playwright and Telegram bot package
-RUN pip install --no-cache-dir playwright python-telegram-bot==20.6
-
-# Install browsers
-RUN playwright install --with-deps
-
+# Set working directory
 WORKDIR /app
-COPY main.py .
 
+# Copy only requirement-relevant files first to cache layers
+COPY pyproject.toml poetry.lock* requirements.txt* ./
+
+# Install pip requirements
+RUN pip install --upgrade pip && \
+    pip install playwright python-telegram-bot && \
+    playwright install --with-deps
+
+# Copy the rest of the code
+COPY . .
+
+# Expose environment variables at runtime
+ENV TELEGRAM_TOKEN=""
+ENV TELEGRAM_CHAT_IDS=""
+ENV CHECK_INTERVAL_MINUTES=1
+
+# Run script
 CMD ["python", "main.py"]
