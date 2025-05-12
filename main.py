@@ -2,6 +2,11 @@ import asyncio
 import os
 from playwright.async_api import async_playwright
 from telegram import Bot
+import time
+
+print("⏳ Startup delay for debug...")
+time.sleep(5)
+print("✅ Python started")
 
 def get_env(name, fallback=None):
     value = os.environ.get(name)
