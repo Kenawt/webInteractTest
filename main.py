@@ -73,8 +73,38 @@ async def check_website(name,url):
                 now = datetime.now(SG_TIMEZONE)
                 print(f"[{name}] No availability as of: {now.strftime('%Y-%m-%d %H:%M:%S')}")
                 #await send_telegram_message("❌ Still no availability.")
+
+                #Debug version
+                screenshot_path = f"screenshot_{name.replace(' ', '_')}.png"
+                await page.screenshot(path=screenshot_path, full_page=True)
+                
+                # Send the text alert
+                await send_telegram_message(f"📅 [{name}] ❌Still no avaiability...\n{url}")
+                
+                # Send the screenshot
+                for chat_id in TELEGRAM_CHAT_IDS:
+                    try:
+                        with open(screenshot_path, "rb") as photo:
+                            await bot.send_photo(chat_id=chat_id, photo=photo)
+                            print(f"📸 Screenshot sent to {chat_id}")
+                    except Exception as e:
+                        print(f"❌ Failed to send screenshot to {chat_id}: {e}")
             else:
+                screenshot_path = f"screenshot_{name.replace(' ', '_')}.png"
+                await page.screenshot(path=screenshot_path, full_page=True)
+                
+                # Send the text alert
                 await send_telegram_message(f"📅 [{name}] A slot might be available!\n{url}")
+                
+                # Send the screenshot
+                for chat_id in TELEGRAM_CHAT_IDS:
+                    try:
+                        with open(screenshot_path, "rb") as photo:
+                            await bot.send_photo(chat_id=chat_id, photo=photo)
+                            print(f"📸 Screenshot sent to {chat_id}")
+                    except Exception as e:
+                        print(f"❌ Failed to send screenshot to {chat_id}: {e}")
+
         except Exception as e:
             await send_telegram_message(f"❗ [{name}] Error during check: {e}")
         finally:
