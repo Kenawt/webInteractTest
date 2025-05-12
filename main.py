@@ -15,7 +15,7 @@ print("✅ Booting up main.py...")
 TELEGRAM_TOKEN = get_env("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_IDS = get_env("TELEGRAM_CHAT_IDS", "").split(",")
 URL = ("https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1mOiKC5Kjxu_1ojfU6-V2URhN1tFZjhiT7WTDsdKIR-IYj-tUCUfMR6x-S_y_NXrr4YW4og4el")
-CHECK_INTERVAL_MINUTES = int(get_env(1)
+CHECK_INTERVAL_MINUTES = int(1)
 
 # Display config
 print("🔍 ENV LOADED:")
