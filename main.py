@@ -45,17 +45,17 @@ async def check_website():
         page = await browser.new_page()
         try:
             await page.goto(URL, timeout=60000)
-            await send_telegram_message("📍 Arrived at page.")
+            #await send_telegram_message("📍 Arrived at page.")
             print("✅ Page loaded successfully.")
 
             await page.wait_for_timeout(5000)
-            await send_telegram_message("⏳ Waited 5 seconds for JavaScript.")
+            #await send_telegram_message("⏳ Waited 5 seconds for JavaScript.")
 
             # Locate and click the button
             locator = page.locator("span", has_text="Jump to the next bookable date").first
             await locator.wait_for(timeout=15000)
             await locator.click()
-            await send_telegram_message("🖱 Clicked 'Jump to next bookable date'.")
+            #await send_telegram_message("🖱 Clicked 'Jump to next bookable date'.")
 
             # Wait another 5s for post-click content updates
             await page.wait_for_timeout(5000)
