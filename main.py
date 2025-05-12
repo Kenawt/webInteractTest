@@ -55,6 +55,7 @@ async def check_website(name,url):
         page = await browser.new_page()
         try:
             await page.goto(URL, timeout=60000)
+            await send_telegram_message(f"📍 [{name}] Arrived at page!\n{url}")
             #await send_telegram_message("📍 Arrived at page.")
             await page.wait_for_timeout(5000)
             #await send_telegram_message("⏳ Waited 5 seconds for JavaScript.")
