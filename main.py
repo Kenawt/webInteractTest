@@ -38,6 +38,15 @@ async def send_telegram_message(message):
             print(f"✅ Message sent to {chat_id}")
         except Exception as e:
             print(f"❌ Telegram error: {e}")
+
+async def send_telegram_screenshot(name, screenshot_path):
+    for chat_id in TELEGRAM_CHAT_IDS:
+        try:
+            with open(screenshot_path, "rb") as photo:
+                await bot.send_photo(chat_id=chat_id, photo=photo)
+                print(f"📸 Screenshot sent to {chat_id}", flush=True)
+        except Exception as e:
+            print(f"❌ Failed to send screenshot to {chat_id}: {e}", flush=True)
             
 async def check_website(name, url):
     try:
@@ -45,7 +54,7 @@ async def check_website(name, url):
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
 
-            # Retry goto once if it fails
+            # Retry goto once
             for attempt in range(2):
                 try:
                     await page.goto(url, timeout=60000)
@@ -59,25 +68,38 @@ async def check_website(name, url):
             await page.wait_for_timeout(10000)
 
             locator = page.locator("span", has_text="Jump to the next bookable date").first
-            await locator.wait_for(timeout=15000)
-            await locator.click()
 
-            await page.wait_for_timeout(10000)
-            content = await page.content()
+            if await locator.is_visible():
+                await locator.click()
+                await page.wait_for_timeout(10000)
+                content = await page.content()
 
-            if "No available times in the next year" in content:
-                now = datetime.now(SG_TIMEZONE)
-                print(f"[{name}] No availability as of: {now.strftime('%Y-%m-%d %H:%M:%S')}", flush=True)
+                if "No available times in the next year" in content:
+                    now = datetime.now(SG_TIMEZONE)
+                    print(f"[{name}] No availability as of: {now.strftime('%Y-%m-%d %H:%M:%S')}", flush=True)
+                else:
+                    screenshot_path = f"screenshot_{name.replace(' ', '_')}.png"
+                    await page.screenshot(path=screenshot_path, full_page=True)
+                    await send_telegram_message(f"📅 [{name}] A slot might be available!\n{url}")
+                    await send_telegram_screenshot(name, screenshot_path)
             else:
-                screenshot_path = f"screenshot_{name.replace(' ', '_')}.png"
-                await page.screenshot(path=screenshot_path, full_page=True)
-                await send_telegram_message(f"📅 [{name}] A slot might be available!\n{url}")
-                await send_telegram_screenshot(name, screenshot_path)
+                raise TimeoutError("Jump button not visible")
 
             await browser.close()
+
+    except TimeoutError as e:
+        # Ignore TimeoutErrors (skip warning)
+        print(f"⏱️ Timeout on [{name}]: {e}", flush=True)
     except Exception as e:
-        await send_telegram_message(f"❗ [{name}] Error during check: {type(e).__name__}: {e}")
+        screenshot_path = f"error_{name.replace(' ', '_')}.png"
+        try:
+            await page.screenshot(path=screenshot_path, full_page=True)
+            await send_telegram_message(f"❗ [{name}] Critical error: {type(e).__name__}: {e}")
+            await send_telegram_screenshot(name, screenshot_path)
+        except:
+            await send_telegram_message(f"❗ [{name}] Error (and screenshot failed): {type(e).__name__}: {e}")
         print(f"❌ [{name}] Crash during check: {e}", flush=True)
+
 
 async def check_all_websites():
     for name, url in URLS_TO_CHECK:
@@ -106,7 +128,7 @@ async def main():
             await send_telegram_message("🕙 Daily check-in: Bot is still running as of 11:00 PM GMT+8.")
             last_daily_ping_date = current_date
 
-        await asyncio.sleep(180)  # 3 minutes
+        await asyncio.sleep(215)  # 3 minutes
 
 if __name__ == "__main__":
     try:
