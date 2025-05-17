@@ -51,7 +51,10 @@ async def send_telegram_screenshot(name, screenshot_path):
 async def check_website(name, url):
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-dev-shm-usage"]
+            )
             page = await browser.new_page()
 
             # Retry goto once
@@ -69,6 +72,11 @@ async def check_website(name, url):
 
             locator = page.locator("span", has_text="Jump to the next bookable date").first
 
+            # Check if the locator exists
+            if await locator.count() == 0:
+                raise TimeoutError("Jump button not found in DOM.")
+
+            # Now check visibility
             if await locator.is_visible():
                 await locator.click()
                 await page.wait_for_timeout(10000)
@@ -83,12 +91,11 @@ async def check_website(name, url):
                     await send_telegram_message(f"📅 [{name}] A slot might be available!\n{url}")
                     await send_telegram_screenshot(name, screenshot_path)
             else:
-                raise TimeoutError("Jump button not visible")
+                raise TimeoutError("Jump button found but not visible.")
 
             await browser.close()
 
     except TimeoutError as e:
-        # Ignore TimeoutErrors (skip warning)
         print(f"⏱️ Timeout on [{name}]: {e}", flush=True)
     except Exception as e:
         screenshot_path = f"error_{name.replace(' ', '_')}.png"
